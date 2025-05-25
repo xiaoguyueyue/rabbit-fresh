@@ -3,7 +3,6 @@ import { onBeforeRouteUpdate, useRoute } from 'vue-router';
 import { getDetail } from '@/apis/detail';
 import { onMounted, onUpdated, ref } from 'vue';
 import DetailHot from './components/DetailHot.vue';
-import ImageView from '@/components/imageView/index.vue';
 
 const route = useRoute();
 const categories = ref([]);
@@ -26,6 +25,11 @@ onBeforeRouteUpdate((to, from, next) => {
     next();
 });
 
+// skuChange规格被操作时
+const skuChange = (sku) => {
+  console.log('skuChange', sku);
+};
+
 </script>
 
 <template>
@@ -47,7 +51,7 @@ onBeforeRouteUpdate((to, from, next) => {
           <div class="goods-info">
             <div class="media">
               <!-- 图片预览区 -->
-               <ImageView></ImageView>
+               <ImageView :imageList="goods.mainPictures"></ImageView>
               <!-- 统计数量 -->
               <ul class="goods-sales">
                 <li>
@@ -96,6 +100,7 @@ onBeforeRouteUpdate((to, from, next) => {
                 </dl>
               </div>
               <!-- sku组件 -->
+               <XtxSku :goods="goods" @change="skuChange"></XtxSku>
 
               <!-- 数据组件 -->
 
