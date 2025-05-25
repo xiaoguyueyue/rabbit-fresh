@@ -8,20 +8,21 @@ const categoryStore = useCategoryStore()
 <template>
   <div class="app-header-sticky" :class="{show: y > 90}">
     <div class="container">
-      <RouterLink class="logo" to="/" />
+      <RouterLink class="logo" to="/"/>
       <!-- 导航区域 -->
       <ul class="app-header-nav ">
         <li class="home">
-          <RouterLink to="/">首页</RouterLink>
+          <RouterLink to="/" exact-active-class="active">首页</RouterLink>
         </li>
         <li class="home" v-for="item in categoryStore.categoryList" :key="item.id">
-          <RouterLink to="/">{{ item.name }}</RouterLink>
+          <RouterLink :to="`/category/${item.id}`"
+          active-class = "active">{{ item.name }}</RouterLink>
         </li>
       </ul>
 
       <div class="right">
-        <RouterLink to="/">品牌</RouterLink>
-        <RouterLink to="/">专题</RouterLink>
+        <RouterLink to="/" active-class = "active">品牌</RouterLink>
+        <RouterLink to="/" active-class = "active">专题</RouterLink>
       </div>
     </div>
   </div>
@@ -29,6 +30,11 @@ const categoryStore = useCategoryStore()
 
 
 <style scoped lang='scss'>
+
+a.active {
+  color: #42b983;
+  font-weight: bold;
+}
 .app-header-sticky {
   width: 100%;
   height: 80px;

@@ -1,7 +1,6 @@
 <script setup>
 import {useCategoryStore} from '@/stores/category'
 const categoryStore = useCategoryStore()
-
 </script>
 
 <template>
@@ -12,10 +11,11 @@ const categoryStore = useCategoryStore()
       </h1>
       <ul class="app-header-nav">
         <li class="home">
-          <RouterLink to="/">首页</RouterLink>
+          <RouterLink to="/" exact-active-class="active">首页</RouterLink>
         </li>
         <li class="home" v-for="item in categoryStore.categoryList" :key="item.id">
-          <RouterLink to="/">{{ item.name }}</RouterLink>
+          <RouterLink :to="`/category/${item.id}`"
+          active-class = "active">{{ item.name }}</RouterLink>
         </li>
       </ul>
       <div class="search">
@@ -30,6 +30,11 @@ const categoryStore = useCategoryStore()
 
 
 <style scoped lang='scss'>
+/* 当前项高亮或 hover 样式 */
+a.active {
+  color: #42b983;
+  font-weight: bold;
+}
 .app-header {
   background: #fff;
 
