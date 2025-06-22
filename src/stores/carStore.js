@@ -52,6 +52,7 @@ export const useCarStore = defineStore('car', ()=>{
         item.selected = selected;
     }
     return {
+        updateCartList,
         cartList,
         addCar,
         removeCar,
