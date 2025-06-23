@@ -30,3 +30,12 @@ export const delCartListAPI = (ids) => {
         }
     })
 }
+
+// 合并购物车列表
+export const mergeCartListAPI = (data) => {
+    return request({
+        url: '/member/cart/merge',
+        method: 'post',
+        data
+    })
+}
