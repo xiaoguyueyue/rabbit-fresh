@@ -1,5 +1,5 @@
 <script setup>
-import { ElMessage } from 'element-plus';  
+import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/stores/user';
 import { useRouter } from 'vue-router';
 const userStore = useUserStore();
@@ -16,7 +16,9 @@ const logout = () =>{
     <div class="container">
       <ul>
         <template v-if="userStore.userInfo?.token">
-          <li><a href="javascript:;"><i class="iconfont icon-user"></i>{{ userStore.userInfo?.nickname }}</a></li>
+          <li>
+            <a href="javascript:;" @click="$router.push('/account')"><i class="iconfont icon-user"></i>{{ userStore.userInfo?.nickname }}</a>
+          </li>
           <li>
             <el-popconfirm @confirm="logout" title="确认退出吗?" confirm-button-text="确认" cancel-button-text="取消">
               <template #reference>

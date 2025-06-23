@@ -43,7 +43,10 @@ export const useCarStore = defineStore('car', ()=>{
         cartList.value = [];
     };
     const getCarList = () => {
-        return cartList;
+      if (userStore.isLogin()) {
+        updateCartList();
+      }
+      return cartList;
     };
 
     // 单选功能
