@@ -1,14 +1,32 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { getCheckInfoAPI, createOrderAPI } from '@/apis/checkout'
+import { getCheckInfoAPI, createOrderAPI, createAddressAPI, deleteAddressAPI } from '@/apis/checkout'
 import { useRouter } from 'vue-router';
-import { useCarStore } from '@/stores/carStore';
+import { ElMessage } from 'element-plus';
+import { useCarStore } from '@/stores/carStore';import {
+  regionData,
+} from "element-china-area-data";
+
+const optionsnative_place = regionData
 const router = useRouter()
 const carStore = useCarStore();
 const checkInfo = ref({})  // 订单对象
 const curAddress = ref({})  // 地址对象
 const toggAddress = ref({})
 const toggleFlag = ref(false)
+const regionCode = ref([])
+
+const createAddressData = ref({
+    receiver: "",
+    contact: "",
+    provinceCode: "",
+    cityCode: "",
+    countyCode: "",
+    address: "",
+    isDefault: 0
+})
+const addFlag = ref(false)
+
 const getCheckInfo = async () => {
   const res = await getCheckInfoAPI()
   checkInfo.value = res.result
@@ -27,12 +45,14 @@ const switchAddress = () => {
 
 const cancleAddress = () => {
     toggAddress.value = curAddress.value
-  toggleFlag.value = false
+    toggleFlag.value = false
+    addFlag.value = false
 }
 
 const submitOrder = async () => {
   if (!curAddress.value.id) {
-    return alert('请先选择收货地址')
+    ElMessage({ type: 'warning', message: '请先选择收货地址' });
+    return
   }
   const res = await createOrderAPI({
     deliveryTimeType:1,
@@ -58,6 +78,32 @@ const submitOrder = async () => {
   carStore.updateCartList()
 
 }
+
+const createAddress = async () => {
+  createAddressData.value.provinceCode = regionCode.value[0]
+  createAddressData.value.cityCode = regionCode.value[1]
+  createAddressData.value.countyCode = regionCode.value[2]
+  if (!createAddressData.value.receiver || !createAddressData.value.contact || !createAddressData.value.address) {
+    ElMessage({ type: 'warning', message: '请填写完整的收货地址信息' });
+    return
+  }
+  const res = await createAddressAPI(createAddressData.value)
+  if (res.code === "1") {
+    ElMessage({ type: 'success', message: '地址添加成功' });
+    getCheckInfo()
+  } else {
+    ElMessage({ type: 'warning', message: '地址添加失败，请稍后再试' });
+  }
+  getCheckInfo()
+  addFlag.value = false
+}
+
+const deleteAddress = async (id) => {
+  if (!id) return
+  await deleteAddressAPI(id)
+  getCheckInfo()
+}
+
 
 </script>
 
@@ -125,7 +171,7 @@ const submitOrder = async () => {
         <!-- 支付方式 -->
         <h3 class="box-title">支付方式</h3>
         <div class="box-body">
-          <a class="my-btn active" href="javascript:;">在线支付</a>
+          <a class="my-btn " href="javascript:;">在线支付</a>
           <a class="my-btn" href="javascript:;">货到付款</a>
           <span style="color:#999">货到付款需付5元手续费</span>
         </div>
@@ -163,7 +209,6 @@ const submitOrder = async () => {
     v-model="toggleFlag"
     title="切换地址"
     width="30%"
-    :before-close="handleClose"
   >
         <div class="addressWrapper">
           <div
@@ -177,6 +222,19 @@ const submitOrder = async () => {
               <li><span>联系方式：</span>{{ address.contact }}</li>
               <li><span>收货地址：</span>{{ address.fullLocation }} {{ address.address }}</li>
             </ul>
+            <div class="addressDelete">
+              <el-popconfirm
+                confirm-button-text="确定"
+                cancel-button-text="取消"
+                width="0"
+                title="确认删除?"
+                @confirm="deleteAddress(address.id)"
+              >
+                <template #reference>
+                  <el-button>x</el-button>
+                </template>
+              </el-popconfirm>
+            </div>
           </div>
         </div>
     <template #footer>
@@ -190,9 +248,50 @@ const submitOrder = async () => {
   </el-dialog>
 
   <!-- 添加地址 -->
+  <el-dialog
+    v-model="addFlag"
+    title="新增地址"
+    width="30%"
+  >
+        <el-form :model="createAddressData" label-width="auto" style="max-width: 600px">
+          <el-form-item label="姓名">
+            <el-input v-model="createAddressData.receiver" />
+          </el-form-item>
+          <el-form-item label="联系方式">
+            <el-input v-model="createAddressData.contact" />
+          </el-form-item>
+          <el-form-item label="省市区" prop="address">
+              <el-cascader v-model="regionCode" :options="optionsnative_place" placeholder="请选择"/>
+          </el-form-item>
+          <el-form-item label="收货地址">
+            <el-input v-model="createAddressData.address" />
+          </el-form-item>
+          <el-form-item label="默认">
+            <el-switch
+              v-model="createAddressData.isDefault"
+              inline-prompt
+              active-value=1
+              inactive-value=0
+              active-text="是"
+              inactive-text="否"
+            />
+          </el-form-item>
+        </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="cancleAddress">取消</el-button>
+        <el-button type="primary" @click="createAddress">
+          确定
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+
 </template>
 
 <style scoped lang="scss">
+@use "sass:color";
 .xtx-pay-checkout-page {
   margin-top: 20px;
 
@@ -385,6 +484,7 @@ const submitOrder = async () => {
   min-height: 90px;
   display: flex;
   align-items: center;
+  position: relative;
 
   &.item {
     border: 1px solid #f5f5f5;
@@ -394,7 +494,7 @@ const submitOrder = async () => {
     &.active,
     &:hover {
       border-color: $xtxColor;
-      background: lighten($xtxColor, 50%);
+      background: color.scale($xtxColor, $lightness: 50%);
     }
 
     >ul {
@@ -402,6 +502,10 @@ const submitOrder = async () => {
       font-size: 14px;
       line-height: 30px;
     }
+  }
+  .addressDelete {
+    position: absolute;
+    right: 20px;
   }
 }
 </style>
