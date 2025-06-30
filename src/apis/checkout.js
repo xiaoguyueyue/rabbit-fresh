@@ -33,3 +33,10 @@ export const createOrderAPI = (data) => {
         data
     })
 }
+
+// 获取订单列表
+export const getOrderAPI = (id) => {
+  return request({
+    url: `/member/order/${id}`
+  })
+}

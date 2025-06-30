@@ -80,6 +80,9 @@ const userStore = useUserStore();
       </el-descriptions-item>
     </el-descriptions>
   </div>
+  <iframe src="https://dify.gz.cvte.cn//chatbot/obzH0gY3LMpKh5R9"
+style="width: 100%; height: 100%; min-height: 700px" frameborder="0"
+allow="microphone"></iframe>
 </template>
 
 

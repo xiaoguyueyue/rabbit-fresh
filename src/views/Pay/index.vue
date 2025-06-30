@@ -1,17 +1,34 @@
 <script setup>
-const payInfo = {}
+import { getOrderAPI } from '@/apis/checkout'
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+const payInfo = ref({})
+const route = useRoute()
+// 支付地址
+const baseURL = 'http://pcapi-xiaotuxian-front-devtest.itheima.net/'
+const backURL = 'http://127.0.0.1:5173/paycallback'
+const redirectUrl = encodeURIComponent(backURL)
+const payUrl = `${baseURL}pay/aliPay?orderId=${route.query.id}&redirect=${redirectUrl}`
+
+const getOrder = async ()=>{
+  const res = await getOrderAPI(route.query.id)
+  payInfo.value = res.result
+}
+
+onMounted(()=>{
+  getOrder()
+})
 </script>
 
 
 <template>
-  <div class="xtx-pay-page">
+  <div class="xtx-pay-page" v-loading="payInfo.id == null" element-loading-text="加载中...">
     <div class="container">
       <!-- 付款信息 -->
       <div class="pay-info">
         <span class="icon iconfont icon-queren2"></span>
         <div class="tip">
-          <p>订单提交成功！请尽快完成支付。</p>
-          <p>支付还剩 <span>24分30秒</span>, 超时后将取消订单</p>
+          <el-countdown title="订单提交成功！请尽快完成支付。" format="[支付还剩] mm[分]ss[秒]" :value="Date.now()+payInfo.countdown*1000" />
         </div>
         <div class="amount">
           <span>应付总额：</span>
@@ -71,6 +88,10 @@ const payInfo = {}
         color: #999;
         font-size: 16px;
       }
+    }
+
+    :deep(.el-statistic__head){
+      font-size: 16px;
     }
   }
 
